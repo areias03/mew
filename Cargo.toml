@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 xml-rs = "0.8"
 thiserror = "1.0"
+good_lp = "1.15.0"
