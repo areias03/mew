@@ -1,3 +1,4 @@
+use crate::model::{Compartment, Model, Parameter, Reaction, Species, SpeciesReference};
 use std::collections::HashMap;
 use std::fs;
 use std::io;
@@ -12,101 +13,6 @@ pub enum SBMLError {
     XmlError(String),
     #[error("Invalid SBML: {0}")]
     InvalidSbml(String),
-}
-
-#[derive(Debug, Clone)]
-pub struct Compartment {
-    pub id: String,
-    pub name: Option<String>,
-    pub size: Option<f64>,
-    pub spatial_dimensions: Option<i32>,
-}
-
-#[derive(Debug, Clone)]
-pub struct Species {
-    pub id: String,
-    pub name: Option<String>,
-    pub compartment: String,
-    pub boundary_condition: bool,
-    pub has_only_substance_units: bool,
-    pub initial_concentration: Option<f64>,
-    pub initial_amount: Option<f64>,
-}
-
-#[derive(Debug, Clone)]
-pub struct Parameter {
-    pub id: String,
-    pub name: Option<String>,
-    pub value: Option<f64>,
-    pub constant: bool,
-}
-
-#[derive(Debug, Clone)]
-pub struct SpeciesReference {
-    pub species: String,
-    pub stoichiometry: Option<f64>,
-    pub role: String, // "reactant", "product"
-}
-
-#[derive(Debug, Clone)]
-pub struct Reaction {
-    pub id: String,
-    pub name: Option<String>,
-    pub reactants: Vec<SpeciesReference>,
-    pub products: Vec<SpeciesReference>,
-    pub reversible: bool,
-    pub fast: bool,
-}
-
-#[derive(Debug, Clone)]
-pub struct Model {
-    pub id: Option<String>,
-    pub name: Option<String>,
-    pub compartments: Vec<Compartment>,
-    pub species: Vec<Species>,
-    pub parameters: Vec<Parameter>,
-    pub reactions: Vec<Reaction>,
-}
-
-impl Model {
-    fn new() -> Self {
-        Model {
-            id: None,
-            name: None,
-            compartments: Vec::new(),
-            species: Vec::new(),
-            parameters: Vec::new(),
-            reactions: Vec::new(),
-        }
-    }
-
-    fn set_id(&mut self, id: &str) {
-        self.id = Some(id.to_string());
-    }
-
-    fn set_name(&mut self, name: &str) {
-        self.name = Some(name.to_string());
-    }
-
-    fn list_of_species(&self) -> Vec<String> {
-        self.species.iter().map(|s| s.id.clone()).collect()
-    }
-
-    fn list_of_reactions(&self) -> Vec<String> {
-        self.reactions.iter().map(|r| r.id.clone()).collect()
-    }
-
-    fn list_of_compartments(&self) -> Vec<String> {
-        self.compartments.iter().map(|c| c.id.clone()).collect()
-    }
-
-    fn get_species_by_id(&self, species_id: &str) -> Option<&Species> {
-        self.species.iter().find(|s| s.id == species_id)
-    }
-
-    fn get_reaction_by_id(&self, reaction_id: &str) -> Option<&Reaction> {
-        self.reactions.iter().find(|r| r.id == reaction_id)
-    }
 }
 
 /// Reads an SBML file and parses it into a Model struct
@@ -258,7 +164,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_simple_sbml() {
+    fn test_parse_sbml() {
         let sbml = r#"<?xml version="1.0"?>
 <sbml xmlns="http://www.sbml.org/sbml/level3/version1/core" level="3" version="1">
   <model id="test_model" name="Test Model">

@@ -1,4 +1,4 @@
-use crate::sbml::*;
+use crate::model::*;
 
 pub enum CommunityError {
     IoError(std::io::Error),
