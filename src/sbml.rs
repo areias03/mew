@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 use std::fs;
 use std::io;
-use xml::reader::{EventReader, XmlEvent};
 use thiserror::Error;
+use xml::reader::{EventReader, XmlEvent};
 
 #[derive(Debug, Error)]
-pub enum SbmlError {
+pub enum SBMLError {
     #[error("IO error: {0}")]
     IoError(#[from] io::Error),
     #[error("XML parsing error: {0}")]
@@ -79,6 +79,34 @@ impl Model {
             reactions: Vec::new(),
         }
     }
+
+    fn set_id(&mut self, id: &str) {
+        self.id = Some(id.to_string());
+    }
+
+    fn set_name(&mut self, name: &str) {
+        self.name = Some(name.to_string());
+    }
+
+    fn list_of_species(&self) -> Vec<String> {
+        self.species.iter().map(|s| s.id.clone()).collect()
+    }
+
+    fn list_of_reactions(&self) -> Vec<String> {
+        self.reactions.iter().map(|r| r.id.clone()).collect()
+    }
+
+    fn list_of_compartments(&self) -> Vec<String> {
+        self.compartments.iter().map(|c| c.id.clone()).collect()
+    }
+
+    fn get_species_by_id(&self, species_id: &str) -> Option<&Species> {
+        self.species.iter().find(|s| s.id == species_id)
+    }
+
+    fn get_reaction_by_id(&self, reaction_id: &str) -> Option<&Reaction> {
+        self.reactions.iter().find(|r| r.id == reaction_id)
+    }
 }
 
 /// Reads an SBML file and parses it into a Model struct
@@ -88,12 +116,12 @@ impl Model {
 ///
 /// # Returns
 /// * `Result<Model, SbmlError>` - The parsed model or an error
-pub fn read_sbml(filepath: &str) -> Result<Model, SbmlError> {
+pub fn read_sbml(filepath: &str) -> Result<Model, SBMLError> {
     let content = fs::read_to_string(filepath)?;
     parse_sbml(&content)
 }
 
-fn parse_sbml(xml_content: &str) -> Result<Model, SbmlError> {
+fn parse_sbml(xml_content: &str) -> Result<Model, SBMLError> {
     let mut model = Model::new();
     let parser = EventReader::from_str(xml_content);
     let mut current_element: Vec<String> = Vec::new();
@@ -101,7 +129,7 @@ fn parse_sbml(xml_content: &str) -> Result<Model, SbmlError> {
     let mut attr_map: HashMap<String, String> = HashMap::new();
 
     for event in parser {
-        match event.map_err(|e| SbmlError::XmlError(e.to_string()))? {
+        match event.map_err(|e| SBMLError::XmlError(e.to_string()))? {
             XmlEvent::StartElement {
                 name, attributes, ..
             } => {
@@ -173,10 +201,7 @@ fn parse_sbml(xml_content: &str) -> Result<Model, SbmlError> {
                                 .get("reversible")
                                 .map(|v| v == "true")
                                 .unwrap_or(false),
-                            fast: attr_map
-                                .get("fast")
-                                .map(|v| v == "true")
-                                .unwrap_or(false),
+                            fast: attr_map.get("fast").map(|v| v == "true").unwrap_or(false),
                         });
                     }
                     "sbml/model/listOfReactions/reaction/listOfReactants/speciesReference" => {
@@ -274,5 +299,14 @@ mod tests {
         assert_eq!(model.species[0].initial_amount, Some(10.0));
         assert_eq!(model.reactions[0].reactants.len(), 1);
         assert_eq!(model.reactions[0].products.len(), 1);
+
+        assert_eq!(model.get_species_by_id("s1").unwrap().id, "s1");
+        assert_eq!(model.get_reaction_by_id("r1").unwrap().id, "r1");
+        assert_eq!(
+            model.list_of_species(),
+            vec!["s1".to_string(), "s2".to_string()]
+        );
+        assert_eq!(model.list_of_reactions(), vec!["r1".to_string()]);
+        assert_eq!(model.list_of_compartments(), vec!["c1".to_string()]);
     }
 }
