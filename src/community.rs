@@ -46,26 +46,49 @@ impl Community {
         self.reactions.push(reaction);
     }
 
-    pub fn list_of_reactions(&self) -> Vec<String> {
-        self.reactions.iter().map(|r| r.id.clone()).collect()
-    }
-
-    pub fn list_of_species(&self) -> Vec<String> {
-        self.species.iter().map(|s| s.id.clone()).collect()
-    }
-
     pub fn list_of_parameters(&self) -> Vec<String> {
         self.parameters.iter().map(|p| p.id.clone()).collect()
     }
+}
 
-    pub fn list_of_compartments(&self) -> Vec<String> {
+impl crate::traits::BiologicalModel for Community {
+    fn list_of_species(&self) -> Vec<String> {
+        self.species.iter().map(|s| s.id.clone()).collect()
+    }
+
+    fn list_of_reactions(&self) -> Vec<String> {
+        self.reactions.iter().map(|r| r.id.clone()).collect()
+    }
+
+    fn list_of_compartments(&self) -> Vec<String> {
         self.compartments.iter().map(|c| c.id.clone()).collect()
+    }
+
+    fn get_species(&self) -> &Vec<Species> {
+        &self.species
+    }
+
+    fn get_reactions(&self) -> &Vec<Reaction> {
+        &self.reactions
+    }
+
+    fn get_compartments(&self) -> &Vec<Compartment> {
+        &self.compartments
+    }
+
+    fn get_species_by_id(&self, species_id: &str) -> Option<&Species> {
+        self.species.iter().find(|s| s.id == species_id)
+    }
+
+    fn get_reaction_by_id(&self, reaction_id: &str) -> Option<&Reaction> {
+        self.reactions.iter().find(|r| r.id == reaction_id)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::traits::BiologicalModel;
 
     #[test]
     fn test_community_creation() {
@@ -112,5 +135,23 @@ mod tests {
         );
         assert_eq!(community.compartments[0].size, Some(1.0));
         assert_eq!(community.compartments[0].spatial_dimensions, Some(3));
+    }
+
+    #[test]
+    fn test_get_species_by_id() {
+        let mut community = Community::new(None);
+        let species = Species {
+            id: "species1".to_string(),
+            name: Some("Species 1".to_string()),
+            compartment: "comp1".to_string(),
+            initial_amount: Some(10.0),
+            initial_concentration: None,
+            boundary_condition: false,
+            has_only_substance_units: false,
+        };
+        community.add_species(species.clone());
+        let retrieved_species = community.get_species_by_id("species1");
+        assert!(retrieved_species.is_some());
+        assert_eq!(retrieved_species.unwrap().id, "species1".to_string());
     }
 }

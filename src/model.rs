@@ -71,24 +71,38 @@ impl Model {
     pub fn set_name(&mut self, name: &str) {
         self.name = Some(name.to_string());
     }
+}
 
-    pub fn list_of_species(&self) -> Vec<String> {
+impl crate::traits::BiologicalModel for Model {
+    fn list_of_species(&self) -> Vec<String> {
         self.species.iter().map(|s| s.id.clone()).collect()
     }
 
-    pub fn list_of_reactions(&self) -> Vec<String> {
+    fn list_of_reactions(&self) -> Vec<String> {
         self.reactions.iter().map(|r| r.id.clone()).collect()
     }
 
-    pub fn list_of_compartments(&self) -> Vec<String> {
+    fn list_of_compartments(&self) -> Vec<String> {
         self.compartments.iter().map(|c| c.id.clone()).collect()
     }
 
-    pub fn get_species_by_id(&self, species_id: &str) -> Option<&Species> {
+    fn get_species(&self) -> &Vec<Species> {
+        &self.species
+    }
+
+    fn get_reactions(&self) -> &Vec<Reaction> {
+        &self.reactions
+    }
+
+    fn get_compartments(&self) -> &Vec<Compartment> {
+        &self.compartments
+    }
+
+    fn get_species_by_id(&self, species_id: &str) -> Option<&Species> {
         self.species.iter().find(|s| s.id == species_id)
     }
 
-    pub fn get_reaction_by_id(&self, reaction_id: &str) -> Option<&Reaction> {
+    fn get_reaction_by_id(&self, reaction_id: &str) -> Option<&Reaction> {
         self.reactions.iter().find(|r| r.id == reaction_id)
     }
 }
@@ -96,6 +110,7 @@ impl Model {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::traits::*;
 
     #[test]
     fn test_model_creation() {

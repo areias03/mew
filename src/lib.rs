@@ -2,3 +2,4 @@
 pub mod community;
 pub mod model;
 pub mod sbml;
+pub mod traits;

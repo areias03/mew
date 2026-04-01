@@ -162,6 +162,7 @@ fn parse_sbml(xml_content: &str) -> Result<Model, SBMLError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::traits::*;
 
     #[test]
     fn test_parse_sbml() {
