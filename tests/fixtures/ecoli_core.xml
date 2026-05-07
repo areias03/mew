@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level3/version1/core" level="3" version="1">
+  <model id="ecoli_core" name="E. coli core model">
+    <listOfCompartments>
+      <compartment id="c" name="cytosol" size="1"/>
+      <compartment id="e" name="extracellular" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="glc__D_e" compartment="e" boundaryCondition="true"/>
+      <species id="glc__D_c" compartment="c"/>
+      <species id="g6p_c" compartment="c"/>
+      <species id="atp_c" compartment="c"/>
+      <species id="adp_c" compartment="c"/>
+      <species id="h_c" compartment="c"/>
+      <species id="h_e" compartment="e" boundaryCondition="true"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="GLCpts" name="Glucose transport" reversible="false">
+        <listOfReactants>
+          <speciesReference species="glc__D_e" stoichiometry="1"/>
+          <speciesReference species="atp_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="glc__D_c" stoichiometry="1"/>
+          <speciesReference species="adp_c" stoichiometry="1"/>
+          <speciesReference species="h_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="PGI" name="Phosphoglucose isomerase" reversible="true">
+        <listOfReactants>
+          <speciesReference species="glc__D_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="g6p_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="Htex" name="Proton exchange" reversible="true">
+        <listOfReactants>
+          <speciesReference species="h_e" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="h_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
